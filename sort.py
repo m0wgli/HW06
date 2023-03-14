@@ -3,7 +3,11 @@ import sys
 import shutil
 from pathlib import Path
 
-unknown_extension = []
+familiar_extension = set()
+
+unknown_extension = set()
+
+images, documents, audio, video, archives = [], [], [], [], []
 
 folders_to_del = []
 
@@ -55,8 +59,9 @@ def sort():
                 print(e)
 
     for item in path.glob('**/*.*'):
-        s = normalize(item.name)
-        os.rename(str(item), str(item.parent / s))
+        if any(item.suffix in ext for ext in extensions.values()):
+            s = normalize(item.name)
+            os.rename(str(item), str(item.parent / s))
 
     for item in path.glob('**/*.*'):
         if item.suffix in extensions['images']:
@@ -71,7 +76,33 @@ def sort():
             shutil.unpack_archive(str(item), str(path / 'archives' / item.stem))
             os.remove(item)
         else:
-            unknown_extension.append(item)
+            unknown_extension.add(item.suffix)
 
+    for item in path.glob('**/*.*'):
+        if any(item.suffix in ext for ext in extensions.values()):
+            familiar_extension.add(item.suffix)
+
+    print(f'familiar_extensions: {familiar_extension}')
+    print(f'unknown_extensions : {unknown_extension}')
+
+    for item in (path / 'images').glob('*.*'):
+        images.append(item.name)
+    print(f'images: {images}')
+
+    for item in (path / 'documents').glob('*.*'):
+        documents.append(item.name)
+    print(f'documents: {documents}')
+
+    for item in (path / 'audio').glob('*.*'):
+        audio.append(item.name)
+    print(f'audio: {audio}')
+
+    for item in (path / 'video').glob('*.*'):
+        video.append(item.name)
+    print(f'video: {video}')
+
+    for item in (path / 'archives').glob('*.*'):
+        archives.append(item.name)
+    print(f'archives: {archives}')
 
 sort()
